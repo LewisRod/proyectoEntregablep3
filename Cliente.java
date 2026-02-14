@@ -6,15 +6,15 @@ public abstract class Cliente {
 
     public Cliente(int id, String nombre) {
         this.id = id;
-        this.nombre = nombre;
+        this.nombre = validarNombre(nombre);
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setNombre() {
-        this.nombre = nombre;
+    private String validarNombre(String nombre) 
+    throws IllegalArgumentException {
+        if (nombre.equalsIgnoreCase(null) || nombre.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del cliente no puede ser nulo o vacio.");
+        }
+        return nombre;
     }
 
     public int getId() {

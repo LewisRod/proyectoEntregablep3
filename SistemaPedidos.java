@@ -1,243 +1,206 @@
 package proyectoEntregablep3;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class SistemaPedidos {
 
-    private Producto[] productos;
-    private Cliente[] clientes;
-    private Pedido[] pedidos;
+    private List<Producto> productos;
+    private List<Cliente> clientes;
+    private List<Pedido> pedidos;
 
-    private int totalProductos;
-    private int totalClientes;
-    private int totalPedidos;
-
-    public SistemaPedidos(int capacidadProductos, int capacidadClientes, int capacidadPedidos) {
-
-        productos = new Producto[capacidadProductos];
-        clientes = new Cliente[capacidadClientes];
-        pedidos = new Pedido[capacidadPedidos];
-
-        totalProductos = 0;
-        totalClientes = 0;
-        totalPedidos = 0;
+    public SistemaPedidos() {
+        productos = new ArrayList<>();
+        clientes = new ArrayList<>();
+        pedidos = new ArrayList<>();
     }
+
+    // ==============================
+    // REGISTROS
+    // ==============================
 
     public void registrarProducto(int id, String nombre, double precio, int stock) {
-
-        if (buscarProductoPorId(id) != null) {
-            System.out.println("Ya existe un producto con ese ID");
+        if (buscarProductoInterno(id) != null) {
+            throw new IllegalArgumentException("Ya existe un producto con ese ID");
         }
 
-        if (totalProductos < productos.length) {
-            productos[totalProductos] = new Producto(id, nombre, precio, stock);
-            totalProductos++;
-        }
-    }
-
-    public Producto buscarProductoPorId(int id) {
-
-        for (int i = 0; i < totalProductos; i++) {
-            if (productos[i].getId() == id) {
-                return productos[i];
-            }
-        }
-        return null;
-    }
-
-    public Cliente buscarClientePorId(int id) {
-
-        for (int i = 0; i < totalClientes; i++) {
-            if (clientes[i].getId() == id) {
-                return clientes[i];
-            }
-        }
-        return null;
+        productos.add(new Producto(id, nombre, precio, stock));
     }
 
     public void registrarClienteRegular(int id, String nombre) {
-
-        if (buscarClientePorId(id) != null) {
-            System.out.println("ya un cliente tiene ese ID");
+        if (buscarClienteInterno(id) != null) {
+            throw new IllegalArgumentException("Ya existe un cliente con ese ID");
         }
 
-        if (totalClientes < clientes.length) {
-            clientes[totalClientes] = new ClienteRegular(id, nombre);
-            totalClientes++;
-        }
+        clientes.add(new ClienteRegular(id, nombre));
     }
 
     public void registrarClienteVIP(int id, String nombre) {
-
-        if (buscarClientePorId(id) != null) {
-            System.out.println("ya un cliente tiene ese ID");
+        if (buscarClienteInterno(id) != null) {
+            throw new IllegalArgumentException("Ya existe un cliente con ese ID");
         }
 
-        if (totalClientes < clientes.length) {
-            clientes[totalClientes] = new ClienteVIP(id, nombre);
-            totalClientes++;
-        }
+        clientes.add(new ClienteVIP(id, nombre));
     }
 
-    public Pedido buscarPedidoPorId(int id) {
+    public void crearPedido(int idPedido, int idCliente)
+            throws PedidoInvalidoException {
 
-        for (int i = 0; i < totalPedidos; i++) {
-            if (pedidos[i].getId() == id) {
-                return pedidos[i];
-            }
+        if (buscarPedidoInterno(idPedido) != null) {
+            throw new PedidoInvalidoException("Ya existe un pedido con ese ID");
         }
 
+        Cliente cliente = buscarClienteInterno(idCliente);
+
+        if (cliente == null) {
+            throw new PedidoInvalidoException("El cliente no existe");
+        }
+
+        pedidos.add(new Pedido(idPedido, cliente));
+    }
+
+    // ==============================
+    // BUSQUEDAS
+    // ==============================
+
+    private Producto buscarProductoInterno(int id) {
+        for (Producto p : productos) {
+            if (p.getId() == id) {
+                return p;
+            }
+        }
         return null;
     }
 
-    public void crearPedido(int idPedido, int idCliente) {
-
-        if (buscarPedidoPorId(idPedido) != null) {
-            System.out.println("ya hay un pedido con ese ID");
+    private Cliente buscarClienteInterno(int id) {
+        for (Cliente c : clientes) {
+            if (c.getId() == id) {
+                return c;
+            }
         }
-
-        Cliente cliente = buscarClientePorId(idCliente);
-
-        if (cliente == null) {
-            System.out.println("El cliente no existe");
-        }
-
-        if (totalPedidos < pedidos.length) {
-            pedidos[totalPedidos] = new Pedido(idPedido, cliente);
-            totalPedidos++;
-        }
+        return null;
     }
 
-    public void agregarProductoAPedido(int idPedido, int idProducto, int cantidad) {
+    private Pedido buscarPedidoInterno(int id) {
+        for (Pedido p : pedidos) {
+            if (p.getId() == id) {
+                return p;
+            }
+        }
+        return null;
+    }
 
-        Pedido pedido = buscarPedidoPorId(idPedido);
+    public Producto buscarProductoPorId(int id)
+            throws ProductoNoEncontradoException {
+
+        Producto producto = buscarProductoInterno(id);
+
+        if (producto == null) {
+            throw new ProductoNoEncontradoException("Producto no encontrado");
+        }
+
+        return producto;
+    }
+
+    public List<Producto> buscarProductoPorNombre(String texto) {
+
+        List<Producto> encontrados = new ArrayList<>();
+        String criterio = texto.trim().toLowerCase();
+
+        for (Producto p : productos) {
+            if (p.getNombre().toLowerCase().contains(criterio)) {
+                encontrados.add(p);
+            }
+        }
+
+        return encontrados;
+    }
+
+    // ==============================
+    // OPERACIONES PEDIDO
+    // ==============================
+
+    public void agregarProductoAPedido(int idPedido, int idProducto, int cantidad)
+            throws ProductoNoEncontradoException,
+                   StockInsuficienteException,
+                   PedidoInvalidoException {
+
+        Pedido pedido = buscarPedidoInterno(idPedido);
 
         if (pedido == null) {
-            System.out.println("El pedido no existe");
+            throw new PedidoInvalidoException("Pedido no encontrado");
         }
 
         Producto producto = buscarProductoPorId(idProducto);
 
-        if (producto == null) {
-            System.out.println("producto no registrado");
-        }
-
-        if (producto.getStock() < cantidad) {
-            System.out.println("no hay esa cantidad en stock");
-        }
-
         pedido.agregarProducto(producto, cantidad);
     }
 
-    public void confirmarPedido(int idPedido) {
+    public void confirmarPedido(int idPedido)
+            throws PedidoInvalidoException,
+                   StockInsuficienteException {
 
-        Pedido pedido = buscarPedidoPorId(idPedido);
+        Pedido pedido = buscarPedidoInterno(idPedido);
 
         if (pedido == null) {
-            System.out.println("El pedido no existe");
-        }
-
-        if (pedido.getEstado() != Pedido.EstadoPedido.BORRADOR) {
-            System.out.println("El pedido no esta en estado BORRADOR");
-        }
-
-        if (pedido.getTotalDetalles() == 0) {
-            System.out.println("No se puede confirmar un pedido sin productos");
-        }
-
-        for (int i = 0; i < pedido.getTotalDetalles(); i++) {
-            DetallePedido detalle = pedido.getDetalles()[i];
-
-            Producto producto = detalle.getProducto();
-            int cantidad = detalle.getCantidad();
-
-            producto.disminuirStock(cantidad);
+            throw new PedidoInvalidoException("Pedido no encontrado");
         }
 
         pedido.confirmarPedido();
     }
 
-    public void cancelarPedido(int idPedido) {
+    public void cancelarPedido(int idPedido)
+            throws PedidoInvalidoException {
 
-        Pedido pedido = buscarPedidoPorId(idPedido);
+        Pedido pedido = buscarPedidoInterno(idPedido);
 
         if (pedido == null) {
-            System.out.println("El pedido no existe");
-        }
-
-        if (pedido.getEstado() == Pedido.EstadoPedido.CONFIRMADO) {
-
-            for (int i = 0; i < pedido.getTotalDetalles(); i++) {
-
-                DetallePedido detalle = pedido.getDetalles()[i];
-
-                Producto producto = detalle.getProducto();
-                int cantidad = detalle.getCantidad();
-
-                producto.aumentarStock(cantidad);
-            }
+            throw new PedidoInvalidoException("Pedido no encontrado");
         }
 
         pedido.cancelarPedido();
     }
 
+    // ==============================
+    // LISTADOS (Iterable)
+    // ==============================
+
     public void listarProductos() {
-
-        if (totalProductos == 0) {
-            System.out.println("No hay productos registrados");
-            return;
-        }
-
-        for (int i = 0; i < totalProductos; i++) {
-
-            Producto p = productos[i];
-
-            System.out.println("Id: " + p.getId() + " | Nombre: " + p.getNombre() + " | Precio: " + p.getPrecio()
+        for (Producto p : productos) {
+            System.out.println("ID: " + p.getId()
+                    + " | Nombre: " + p.getNombre()
+                    + " | Precio: " + p.getPrecio()
                     + " | Stock: " + p.getStock());
         }
     }
 
+    public void listarClientes() {
+        for (Cliente c : clientes) {
+            System.out.println("ID: " + c.getId()
+                    + " | Nombre: " + c.getNombre());
+        }
+    }
+
     public void listarPedidos() {
-
-        if (totalPedidos == 0) {
-            System.out.println("No hay pedidos registrados.");
-            return;
-        }
-
-        for (int i = 0; i < totalPedidos; i++) {
-
-            Pedido p = pedidos[i];
-
-            System.out.println("Id Pedido: " + p.getId() + " | Cliente: " + p.getCliente().getNombre() + " | Estado: "
-                    + p.getEstado() + " | Total: " + p.calcularTotalFinal());
+        for (Pedido p : pedidos) {
+            System.out.println("ID: " + p.getId()
+                    + " | Cliente: " + p.getCliente().getNombre()
+                    + " | Fecha: " + p.getFechaFormateada()
+                    + " | Estado: " + p.getEstado()
+                    + " | Total: " + p.calcularTotalFinal());
         }
     }
 
-    public void verDetallePedido(int idPedido) {
+    public void eliminarProducto(int id) {
 
-        Pedido pedido = buscarPedidoPorId(idPedido);
+        Iterator<Producto> it = productos.iterator();
 
-        if (pedido == null) {
-            System.out.println("Pedido no encontrado");
-            return;
+        while (it.hasNext()) {
+            Producto p = it.next();
+            if (p.getId() == id) {
+                it.remove();   // eliminación segura
+            }
         }
-
-        System.out.println("Pedido Id: " + pedido.getId());
-        System.out.println("Cliente: " + pedido.getCliente().getNombre());
-        System.out.println("Estado: " + pedido.getEstado());
-        System.out.println("  Detalles  ");
-
-        for (int i = 0; i < pedido.getTotalDetalles(); i++) {
-
-            DetallePedido detalle = pedido.getDetalles()[i];
-
-            System.out.println(
-                    "Producto: " + detalle.getProducto().getNombre() + " | Cantidad: " + detalle.getCantidad()
-                            + " | Precio Unitario: " + detalle.getPrecioUnitario() + " | Subtotal: "
-                            + detalle.calcularSubtotal());
-        }
-
-        System.out.println("Subtotal: " + pedido.calcularSubtotal());
-        System.out.println("Descuento: " + pedido.calcularDescuento());
-        System.out.println("Total Final: " + pedido.calcularTotalFinal());
     }
-
 }

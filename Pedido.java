@@ -1,5 +1,10 @@
 package proyectoEntregablep3;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.text.SimpleDateFormat;
+
 public class Pedido {
 
     public enum EstadoPedido {
@@ -11,15 +16,15 @@ public class Pedido {
     private int id;
     private Cliente cliente;
     private EstadoPedido estado;
-    private DetallePedido[] detalles;
-    private int totalProductos;
+    private List<DetallePedido> detalles;
+    private Date fechaCreacion;
 
     public Pedido(int id, Cliente cliente) {
         this.id = id;
         this.cliente = cliente;
         this.estado = EstadoPedido.BORRADOR;
-        this.detalles = new DetallePedido[30];
-        this.totalProductos = 0;
+        this.detalles = new ArrayList<>();
+        this.fechaCreacion = new Date();
     }
 
     public int getId() {
@@ -34,23 +39,33 @@ public class Pedido {
         return estado;
     }
 
-    public void agregarProducto(Producto producto, int cantidad) {
+    public Date getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public String getFechaFormateada() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        return simpleDateFormat.format(fechaCreacion);
+    }
+
+    public void agregarProducto(Producto producto, int cantidad)
+            throws StockInsuficienteException {
 
         if (estado != EstadoPedido.BORRADOR) {
-            System.out.print("solo se agregan productos en estado borrador");
+            throw new IllegalStateException("Solo se agregan productos en estado BORRADOR");
         }
 
-        if (totalProductos < detalles.length) {
-            detalles[totalProductos] = new DetallePedido(producto, cantidad);
-            totalProductos++;
+        if (producto.getStock() < cantidad) {
+            throw new StockInsuficienteException("Stock insuficiente");
         }
+
+        detalles.add(new DetallePedido(producto, cantidad));
     }
 
     public double calcularSubtotal() {
         double subtotal = 0;
-
-        for (int i = 0; i < totalProductos; i++) {
-            subtotal += detalles[i].calcularSubtotal();
+        for (DetallePedido detalle : detalles) {
+            subtotal += detalle.calcularSubtotal();
         }
         return subtotal;
     }
@@ -63,19 +78,32 @@ public class Pedido {
         return calcularSubtotal() - calcularDescuento();
     }
 
-    public DetallePedido[] getDetalles() {
-        return detalles;
-    }
+    public void confirmarPedido() 
+     throws PedidoInvalidoException, StockInsuficienteException {
 
-    public void confirmarPedido() {
+        if (detalles.isEmpty()) {
+            throw new PedidoInvalidoException("No se puede confirmar un pedido vacio");
+        }
+
+        for (DetallePedido detalle : detalles) {
+            detalle.getProducto().disminuirStock(detalle.getCantidad());
+        }
+
         estado = EstadoPedido.CONFIRMADO;
     }
 
     public void cancelarPedido() {
+
+        if (estado == EstadoPedido.CONFIRMADO) {
+            for (DetallePedido detalle : detalles) {
+                detalle.getProducto().aumentarStock(detalle.getCantidad());
+            }
+        }
+
         estado = EstadoPedido.CANCELADO;
     }
 
-    public int getTotalDetalles() {
-        return totalProductos;
+    public List<DetallePedido> getDetalles() {
+        return detalles;
     }
 }
