@@ -9,6 +9,6 @@ public class ClienteRegular extends Cliente {
 
     @Override
     public double calcularDescuento(double subtotal) {
-        return 0;   //No aplica descuento
+        return 0;   
     }
 }

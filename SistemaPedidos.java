@@ -16,10 +16,6 @@ public class SistemaPedidos {
         pedidos = new ArrayList<>();
     }
 
-    // ==============================
-    // REGISTROS
-    // ==============================
-
     public void registrarProducto(int id, String nombre, double precio, int stock) {
         if (buscarProductoInterno(id) != null) {
             throw new IllegalArgumentException("Ya existe un producto con ese ID");
@@ -40,7 +36,6 @@ public class SistemaPedidos {
         if (buscarClienteInterno(id) != null) {
             throw new IllegalArgumentException("Ya existe un cliente con ese ID");
         }
-
         clientes.add(new ClienteVIP(id, nombre));
     }
 
@@ -59,10 +54,6 @@ public class SistemaPedidos {
 
         pedidos.add(new Pedido(idPedido, cliente));
     }
-
-    // ==============================
-    // BUSQUEDAS
-    // ==============================
 
     private Producto buscarProductoInterno(int id) {
         for (Producto p : productos) {
@@ -103,6 +94,7 @@ public class SistemaPedidos {
         return producto;
     }
 
+
     public List<Producto> buscarProductoPorNombre(String texto) {
 
         List<Producto> encontrados = new ArrayList<>();
@@ -117,14 +109,10 @@ public class SistemaPedidos {
         return encontrados;
     }
 
-    // ==============================
-    // OPERACIONES PEDIDO
-    // ==============================
-
     public void agregarProductoAPedido(int idPedido, int idProducto, int cantidad)
             throws ProductoNoEncontradoException,
-                   StockInsuficienteException,
-                   PedidoInvalidoException {
+            StockInsuficienteException,
+            PedidoInvalidoException {
 
         Pedido pedido = buscarPedidoInterno(idPedido);
 
@@ -139,7 +127,7 @@ public class SistemaPedidos {
 
     public void confirmarPedido(int idPedido)
             throws PedidoInvalidoException,
-                   StockInsuficienteException {
+            StockInsuficienteException {
 
         Pedido pedido = buscarPedidoInterno(idPedido);
 
@@ -162,33 +150,23 @@ public class SistemaPedidos {
         pedido.cancelarPedido();
     }
 
-    // ==============================
-    // LISTADOS (Iterable)
-    // ==============================
-
     public void listarProductos() {
         for (Producto p : productos) {
-            System.out.println("ID: " + p.getId()
-                    + " | Nombre: " + p.getNombre()
-                    + " | Precio: " + p.getPrecio()
+            System.out.println("Id: " + p.getId() + " | Nombre: " + p.getNombre() + " | Precio: " + p.getPrecio()
                     + " | Stock: " + p.getStock());
         }
     }
 
     public void listarClientes() {
         for (Cliente c : clientes) {
-            System.out.println("ID: " + c.getId()
-                    + " | Nombre: " + c.getNombre());
+            System.out.println("Id: " + c.getId() + " | Nombre: " + c.getNombre());
         }
     }
 
     public void listarPedidos() {
         for (Pedido p : pedidos) {
-            System.out.println("ID: " + p.getId()
-                    + " | Cliente: " + p.getCliente().getNombre()
-                    + " | Fecha: " + p.getFechaFormateada()
-                    + " | Estado: " + p.getEstado()
-                    + " | Total: " + p.calcularTotalFinal());
+            System.out.println("Id: " + p.getId() + " | Cliente: " + p.getCliente().getNombre() + " | Fecha: "
+                    + p.getFechaFormateada() + " | Estado: " + p.getEstado() + " | Total: " + p.calcularTotalFinal());
         }
     }
 
@@ -199,7 +177,7 @@ public class SistemaPedidos {
         while (it.hasNext()) {
             Producto p = it.next();
             if (p.getId() == id) {
-                it.remove();   // eliminación segura
+                it.remove();
             }
         }
     }

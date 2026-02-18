@@ -75,10 +75,10 @@ public class Main {
                         break;
 
                     case 3:
-                        System.out.print("ID Pedido: ");
+                        System.out.print("Id Pedido: ");
                         int idPedido = scanner.nextInt();
 
-                        System.out.print("ID Cliente: ");
+                        System.out.print("Id Cliente: ");
                         int idCli = scanner.nextInt();
 
                         sistema.crearPedido(idPedido, idCli);
@@ -86,10 +86,10 @@ public class Main {
                         break;
 
                     case 4:
-                        System.out.print("ID Pedido: ");
+                        System.out.print("Id Pedido: ");
                         int idPed = scanner.nextInt();
 
-                        System.out.print("ID Producto: ");
+                        System.out.print("Id Producto: ");
                         int idProducto = scanner.nextInt();
 
                         System.out.print("Cantidad: ");
@@ -100,7 +100,7 @@ public class Main {
                         break;
 
                     case 5:
-                        System.out.print("ID Pedido: ");
+                        System.out.print("Id Pedido: ");
                         int idConfirmar = scanner.nextInt();
 
                         sistema.confirmarPedido(idConfirmar);
@@ -108,7 +108,7 @@ public class Main {
                         break;
 
                     case 6:
-                        System.out.print("ID Pedido: ");
+                        System.out.print("Id Pedido: ");
                         int idCancelar = scanner.nextInt();
 
                         sistema.cancelarPedido(idCancelar);
@@ -155,7 +155,5 @@ public class Main {
             }
 
         } while (opcion != 0);
-
-        scanner.close();
     }
 }
