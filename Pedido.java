@@ -10,6 +10,7 @@ public class Pedido {
     public enum EstadoPedido {
         BORRADOR,
         CONFIRMADO,
+        PROCESADO,
         CANCELADO
     }
 
@@ -17,14 +18,14 @@ public class Pedido {
     private Cliente cliente;
     private EstadoPedido estado;
     private List<DetallePedido> detalles;
-    private Date fechaCreacion;
+    private Date fecha;
 
     public Pedido(int id, Cliente cliente) {
         this.id = id;
         this.cliente = cliente;
         this.estado = EstadoPedido.BORRADOR;
         this.detalles = new ArrayList<>();
-        this.fechaCreacion = new Date();
+        this.fecha = new Date();
     }
 
     public int getId() {
@@ -35,24 +36,26 @@ public class Pedido {
         return cliente;
     }
 
-    public EstadoPedido getEstado() {
+    public synchronized EstadoPedido getEstado() {
         return estado;
     }
 
-    public Date getFechaCreacion() {
-        return fechaCreacion;
+    public Date getFecha() {
+        return fecha;
     }
+
 
     public String getFechaFormateada() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        return simpleDateFormat.format(fechaCreacion);
+        return simpleDateFormat.format(fecha);
     }
+
 
     public void agregarProducto(Producto producto, int cantidad)
             throws StockInsuficienteException {
 
         if (estado != EstadoPedido.BORRADOR) {
-            throw new IllegalStateException("Solo se agregan productos en estado BORRADOR");
+            throw new StockInsuficienteException("Solo se agregan productos en estado BORRADOR");
         }
 
         if (producto.getStock() < cantidad) {
@@ -62,6 +65,7 @@ public class Pedido {
         detalles.add(new DetallePedido(producto, cantidad));
     }
 
+
     public double calcularSubtotal() {
         double subtotal = 0;
         for (DetallePedido detalle : detalles) {
@@ -70,16 +74,19 @@ public class Pedido {
         return subtotal;
     }
 
+
     public double calcularDescuento() {
         return cliente.calcularDescuento(calcularSubtotal());
     }
+
 
     public double calcularTotalFinal() {
         return calcularSubtotal() - calcularDescuento();
     }
 
-    public void confirmarPedido() 
-     throws PedidoInvalidoException, StockInsuficienteException {
+
+    public void confirmarPedido()
+            throws PedidoInvalidoException, StockInsuficienteException {
 
         if (detalles.isEmpty()) {
             throw new PedidoInvalidoException("No se puede confirmar un pedido vacio");
@@ -92,6 +99,7 @@ public class Pedido {
         estado = EstadoPedido.CONFIRMADO;
     }
 
+
     public void cancelarPedido() {
 
         if (estado == EstadoPedido.CONFIRMADO) {
@@ -103,7 +111,24 @@ public class Pedido {
         estado = EstadoPedido.CANCELADO;
     }
 
+
     public List<DetallePedido> getDetalles() {
         return detalles;
     }
+
+
+    public synchronized void marcarComoProcesado() {
+        if (estado == EstadoPedido.CONFIRMADO) {
+            estado = EstadoPedido.PROCESADO;
+        }
+    }
+
+
+    public synchronized void marcarComoConfirmadoDesdeArchivo() {
+    this.estado = EstadoPedido.CONFIRMADO;
+}
+
+public synchronized void marcarComoProcesadoDesdeArchivo() {
+    this.estado = EstadoPedido.PROCESADO;
+}
 }

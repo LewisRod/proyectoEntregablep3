@@ -4,8 +4,8 @@ public class ClienteVIP extends Cliente {
 
     private double porcentajeDescuento = 0.20;
 
-    public ClienteVIP(int id, String nombre) {
-        super(id, nombre);
+    public ClienteVIP(int id, String nombre,String direccion) {
+        super(id, nombre,direccion);
     }
 
     @Override

@@ -4,12 +4,24 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
-        Scanner scanner = new Scanner(System.in);
         SistemaPedidos sistema = new SistemaPedidos();
 
-        int opcion;
+        ProcesadorPedidos procesador = new ProcesadorPedidos(sistema);
+        Thread hiloProcesador = new Thread(procesador);
+
+        GeneradorReportes generador = new GeneradorReportes(sistema);
+        Thread hiloReportes = new Thread(generador);
+
+        hiloReportes.setDaemon(true);
+    
+        hiloProcesador.start();
+        hiloReportes.start();
+
+        Scanner scanner = new Scanner(System.in);
+
+        int opcion = -1;
 
         do {
 
@@ -23,6 +35,10 @@ public class Main {
             System.out.println("7. Listar productos");
             System.out.println("8. Listar clientes");
             System.out.println("9. Listar pedidos");
+            System.out.println("10. Guardar sistema manualmente");
+            System.out.println("11. Cargar sistema desde archivos");
+            System.out.println("12. Generar reporte del sistema");
+            System.out.println("13. Ver estado de procesamiento");
             System.out.println("0. Salir");
             System.out.print("Seleccione una opcion: ");
 
@@ -48,7 +64,6 @@ public class Main {
                         int stock = scanner.nextInt();
 
                         sistema.registrarProducto(idProd, nombreProd, precio, stock);
-                        System.out.println("Producto registrado correctamente.");
                         break;
 
                     case 2:
@@ -59,19 +74,17 @@ public class Main {
                         System.out.print("Nombre: ");
                         String nombreCliente = scanner.nextLine();
 
+                        System.out.print("Direccion: ");
+                        String direccionCliente = scanner.nextLine();
+
                         System.out.print("1 = Regular | 2 = VIP: ");
                         int tipo = scanner.nextInt();
 
                         if (tipo == 1) {
-                            sistema.registrarClienteRegular(idCliente, nombreCliente);
-                        } 
-                        else if (tipo == 2) {
-                            sistema.registrarClienteVIP(idCliente, nombreCliente);
-                        } else {
-                            System.out.println("Tipo invalido.");
+                            sistema.registrarClienteRegular(idCliente, nombreCliente, direccionCliente);
+                        } else if (tipo == 2) {
+                            sistema.registrarClienteVIP(idCliente, nombreCliente, direccionCliente);
                         }
-
-                        System.out.println("Cliente registrado.");
                         break;
 
                     case 3:
@@ -82,7 +95,6 @@ public class Main {
                         int idCli = scanner.nextInt();
 
                         sistema.crearPedido(idPedido, idCli);
-                        System.out.println("Pedido creado correctamente.");
                         break;
 
                     case 4:
@@ -96,23 +108,18 @@ public class Main {
                         int cantidad = scanner.nextInt();
 
                         sistema.agregarProductoAPedido(idPed, idProducto, cantidad);
-                        System.out.println("Producto agregado al pedido.");
                         break;
 
                     case 5:
                         System.out.print("Id Pedido: ");
                         int idConfirmar = scanner.nextInt();
-
                         sistema.confirmarPedido(idConfirmar);
-                        System.out.println("Pedido confirmado.");
                         break;
 
                     case 6:
                         System.out.print("Id Pedido: ");
                         int idCancelar = scanner.nextInt();
-
                         sistema.cancelarPedido(idCancelar);
-                        System.out.println("Pedido cancelado.");
                         break;
 
                     case 7:
@@ -127,33 +134,46 @@ public class Main {
                         sistema.listarPedidos();
                         break;
 
+                    case 10:
+                        sistema.guardarTodo();
+                        System.out.println("Sistema guardado manualmente.");
+                        break;
+
+                    case 11:
+                        sistema.recargarSistema();
+                        break;
+
+                    case 12:
+                        String reporte = sistema.generarReporteConsolidado();
+                        GestorReportesSistema.generarReporte(reporte);
+                        System.out.println("Reporte generado correctamente.");
+                        break;
+
+                    case 13:
+                        System.out.println(sistema.obtenerEstadoProcesamiento());
+                        break;
+
                     case 0:
-                        System.out.println("FIN DEL PROGRAMA");
+                        System.out.println("Cerrando sistema...");
+
+                        procesador.detener();
+                        hiloProcesador.join();
+
+                        sistema.guardarTodo();
+
+                        System.out.println("Sistema cerrado correctamente.");
                         break;
 
                     default:
                         System.out.println("Opcion invalida.");
                 }
 
-            } catch (ProductoNoEncontradoException e) {
-                System.out.println("Error: " + e.getMessage());
-
-            } catch (StockInsuficienteException e) {
-                System.out.println("Error: " + e.getMessage());
-
-            } catch (PedidoInvalidoException e) {
-                System.out.println("Error: " + e.getMessage());
-
-            } catch (IllegalArgumentException e) {
-                System.out.println("Error de datos: " + e.getMessage());
-
             } catch (Exception e) {
-                System.out.println("Error inesperado: " + e.getMessage());
-
-            } finally {
-                System.out.println("Operacion finalizada.\n");
+                System.out.println("Error: " + e.getMessage());
             }
 
         } while (opcion != 0);
+
+        scanner.close();
     }
 }

@@ -23,12 +23,6 @@ public class Producto {
         this.stock = stock;
     }
 
-    private String validarNombre(String nombre) {
-        if (nombre.equalsIgnoreCase(null) || nombre.trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre no puede ser nulo o vacio");
-        }
-        return nombre;
-    }
 
     public int getId() {
         return id;
@@ -46,15 +40,27 @@ public class Producto {
         return stock;
     }
 
-    public void disminuirStock(int cantidad)
+    
+    private String validarNombre(String nombre) {
+        if (nombre.equalsIgnoreCase(null) || nombre.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre no puede ser nulo o vacio");
+        }
+        return nombre;
+    }
+
+
+    public synchronized void disminuirStock(int cantidad)
             throws StockInsuficienteException {
+
         if (cantidad > stock) {
             throw new StockInsuficienteException("Stock insuficiente para el producto: " + nombre);
         }
+
         stock -= cantidad;
     }
+    
 
-    public void aumentarStock(int cantidad) {
-        stock += cantidad;
-    }
+    public synchronized void aumentarStock(int cantidad) {
+    stock += cantidad;
+}
 }
