@@ -303,7 +303,7 @@ public class SistemaPedidos {
         pedidos.add(pedido);
     }
 
-    public String generarReporteConsolidado() {
+    public String generarReporteGeneral() {
 
         List<Producto> copiaProductos;
         List<Cliente> copiaClientes;
@@ -355,7 +355,7 @@ public class SistemaPedidos {
 
         String fechaHora = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date());
 
-        return "---REPORTE CONSOLIDADO DEL SISTEMA----\n" +
+        return "---REPORTE DEL SISTEMA----\n" +
                 "Fecha y hora: " + fechaHora + "\n\n" +
                 "Total productos registrados: " + totalProductos + "\n" +
                 "Total clientes registrados: " + totalClientes + "\n\n" +
@@ -373,14 +373,12 @@ public class SistemaPedidos {
 
     public synchronized void recargarSistema() {
 
-    // Volver a cargar productos y clientes desde archivos binarios
     productos = GestorProductos.cargarProductos();
     clientes = GestorClientes.cargarClientes();
 
-    // Limpiar pedidos actuales antes de recargar
+
     pedidos.clear();
 
-    // Cargar pedidos desde archivo de texto
     GestorPedidosTexto.cargarPedidos(this);
 
     System.out.println("Sistema recargado correctamente desde archivos.");

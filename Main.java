@@ -144,7 +144,7 @@ public class Main {
                         break;
 
                     case 12:
-                        String reporte = sistema.generarReporteConsolidado();
+                        String reporte = sistema.generarReporteGeneral();
                         GestorReportesSistema.generarReporte(reporte);
                         System.out.println("Reporte generado correctamente.");
                         break;

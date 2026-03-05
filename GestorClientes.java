@@ -18,7 +18,7 @@ public class GestorClientes {
                 out.writeUTF(c.getNombre());
                 out.writeUTF(c.getDireccion());
 
-                // Guardamos tipo para reconstruir correctamente
+               
                 if (c instanceof ClienteVIP) {
                     out.writeUTF("VIP");
                 } else {
@@ -27,7 +27,7 @@ public class GestorClientes {
             }
 
         } catch (EOFException e) {
-                // fin normal
+               e.printStackTrace();
             } catch (FileNotFoundException e) {
                 System.out.println("Archivo clientes.dat no encontrado.");
             } catch (IOException e) {
@@ -64,7 +64,7 @@ public class GestorClientes {
                 }
 
             } catch (EOFException e) {
-                // fin normal
+               e.printStackTrace();
             } catch (FileNotFoundException e) {
                 System.out.println("Archivo clientes.dat no encontrado.");
             } catch (IOException e) {

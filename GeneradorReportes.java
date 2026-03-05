@@ -24,7 +24,7 @@ public void run() {
 
             Thread.sleep(10000);
 
-            String reporte = sistema.generarReporteConsolidado();
+            String reporte = sistema.generarReporteGeneral();
 
             GestorReportesSistema.generarReporte(reporte);
 
